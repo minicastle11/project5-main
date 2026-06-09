@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@EntityListeners(AuditingEntityListener.class)
+@EntityListeners(AuditingEntityListener.class) // 감시자로 사용된다. 저장, 수정시간 때문에 사용
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

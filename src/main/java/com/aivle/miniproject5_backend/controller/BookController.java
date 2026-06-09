@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RequestMapping("/api/v1/books")
+@RequestMapping("/api/v1/books") // Request에 일일히 쓸 필요 없이 매핑
 @RestController
 @RequiredArgsConstructor // 생성자를 만들어 줌
 public class BookController {
@@ -66,8 +66,8 @@ public class BookController {
         return ResponseEntity.ok(updatedBook);
     }
 
-    @GetMapping("/search")
     // 책 검색
+    @GetMapping("/search")
     public List<Book> searchBooks(@RequestParam(required = false)String title,
                                   @RequestParam(required = false) String author) {
         if (title != null) {

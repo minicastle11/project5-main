@@ -14,18 +14,20 @@ import java.util.List;
 public class BookService {
     private final BookRepository bookRepository;
 
-    @Transactional(readOnly = true)
     // id로 찾기
+    @Transactional(readOnly = true)
     public Book findById(Long id) {
         return bookRepository.findById(id).orElseThrow(()-> new BookNotFoundException(id));
     }
-    @Transactional(readOnly = true)
+
     // 모든 데이터
+    @Transactional(readOnly = true)
     public List<Book> findAll() {
         return bookRepository.findAll();
     }
-    @Transactional
+
     // 책 삭제
+    @Transactional
     public void deleteBook(Long id) {
         if(bookRepository.existsById(id)) {
             bookRepository.deleteById(id);
@@ -33,23 +35,26 @@ public class BookService {
             throw new BookNotFoundException(id);
         }
     }
-    @Transactional(readOnly = true)
+
     // 제목을 키워드로 검색
+    @Transactional(readOnly = true)
     public List<Book> searchByTitleContaining(String keyword) {
         return bookRepository.findByTitleContaining(keyword);
     }
-    @Transactional(readOnly = true)
+
     // 저자를 키워드로 검색
+    @Transactional(readOnly = true)
     public List<Book> searchByAuthorContaining(String keyword) {
         return bookRepository.findByAuthorContaining(keyword);
     }
-    @Transactional
     // 책 추가
+    @Transactional
     public Book create(Book book) {
         return bookRepository.save(book);
     }
-    @Transactional
+
     // 책 업데이트
+    @Transactional
     public Book update(Long id, Book book) {
         Book existing = findById(id);
 
@@ -65,16 +70,16 @@ public class BookService {
         return bookRepository.save(existing);
     }
 
-    @Transactional
     // 좋아요 수 증가
+    @Transactional
     public Book addLikes(Long id) {
         Book book = findById(id);
         book.setLikes(book.getLikes() + 1);
         return bookRepository.save(book);
     }
 
-    @Transactional
     // 조회 수 증가
+    @Transactional
     public Book addViews(Long id) {
         Book book = findById(id);
         book.setViews(book.getViews() + 1);
