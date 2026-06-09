@@ -67,6 +67,9 @@ public class BookService {
         if (book.getContent() != null) {
             existing.setContent(book.getContent());
         }
+        if (book.getCoverImageUrl() != null) {
+            existing.setCoverImageUrl(book.getCoverImageUrl());
+        }
         return bookRepository.save(existing);
     }
 

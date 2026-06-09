@@ -32,7 +32,8 @@ public class Book {
     @NotBlank
     private String author;
 
-    @Column(nullable = false)
+    @Lob
+    @Column(nullable = false, columnDefinition = "MEDIUMTEXT") // 255자 제한 및 용량 한계 있어서, 필요(내용 길어짐 대비)
     @NotBlank
     private String content;
 
