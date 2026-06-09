@@ -38,6 +38,9 @@ public class Book {
 
     private Integer likes = 0;
     private Integer views = 0;
+
+    @Lob
+    @Column(columnDefinition="MEDIUMTEXT") // 255자 제한 및 용량 한계 있어서, 필요(Base64 담기 가능)
     private String coverImageUrl;
 
     // 생성되면 날짜 자동으로 생김
