@@ -50,6 +50,9 @@ public class BookService {
     // 책 추가
     @Transactional
     public Book create(Book book) {
+        if (book.getLikes() == null) book.setLikes(0);
+        if (book.getViews() == null) book.setViews(0);
+
         return bookRepository.save(book);
     }
 
