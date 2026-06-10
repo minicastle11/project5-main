@@ -38,11 +38,7 @@ public class BookController {
     // 등록
     @PostMapping
     public ResponseEntity<Book> createBook(@Valid @RequestBody Book book) {
-        if (book.getLikes() == null) book.setLikes(0);
-        if (book.getViews() == null) book.setViews(0);
-
         Book saved = bookService.create(book);
-
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
@@ -68,7 +64,7 @@ public class BookController {
 
     // 책 검색
     @GetMapping("/search")
-    public List<Book> searchBooks(@RequestParam(required = false)String title,
+    public List<Book> searchBooks(@RequestParam(required = false) String title,
                                   @RequestParam(required = false) String author) {
         if (title != null) {
             return bookService.searchByTitleContaining(title);
