@@ -91,5 +91,25 @@ public class BookService {
         book.setViews(book.getViews() + 1);
         return bookRepository.save(book);
     }
+    // 표지 이미지 URL 업데이트
+    @Transactional
+    public Book updateBookWithCover(Long id, Book book) {
+        Book existing = findById(id);
+
+        if (book.getTitle() != null) {
+            existing.setTitle(book.getTitle());
+        }
+        if (book.getAuthor() != null) {
+            existing.setAuthor(book.getAuthor());
+        }
+        if (book.getContent() != null) {
+            existing.setContent(book.getContent());
+        }
+        if (book.getCoverImageUrl() != null) {
+            existing.setCoverImageUrl(book.getCoverImageUrl());
+        }
+
+        return bookRepository.save(existing);
+    }
 
 }
