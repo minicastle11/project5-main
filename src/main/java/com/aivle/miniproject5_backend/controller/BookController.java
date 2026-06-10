@@ -4,6 +4,7 @@ import com.aivle.miniproject5_backend.domain.Book;
 import com.aivle.miniproject5_backend.service.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,13 @@ public class BookController {
     @GetMapping
     public List<Book> getAll() {
         return bookService.findAll();
+    }
+    // 페이징 모든 책
+    @GetMapping("/page")
+    public Page<Book> getPage(@RequestParam(defaultValue="0") int page,
+                              @RequestParam(defaultValue="8") int size,
+                              @RequestParam(defaultValue="createdAt") String sortBy) {
+        return bookService.findPage(page, size, sortBy);
     }
 
     // 삭제

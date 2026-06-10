@@ -4,6 +4,9 @@ import com.aivle.miniproject5_backend.domain.Book;
 import com.aivle.miniproject5_backend.exception.BookNotFoundException;
 import com.aivle.miniproject5_backend.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +29,13 @@ public class BookService {
     public List<Book> findAll() {
         Sort sort = Sort.by("createdAt").descending();
         return bookRepository.findAll(sort);
+    }
+    // 페이징
+    @Transactional(readOnly = true)
+    public Page<Book> findPage(int page, int size, String sortBy) {
+        Sort sort = Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return bookRepository.findAll(pageable);
     }
 
     // 책 삭제
