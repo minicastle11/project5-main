@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RequestMapping("/api/v1/books") // Request에 일일히 쓸 필요 없이 매핑
 @RestController
@@ -46,6 +47,12 @@ public class BookController {
     @PatchMapping("/{id}")
     public Book updateBook(@PathVariable Long id, @RequestBody Book book) {
         return bookService.update(id, book);
+    }
+
+    // 표지 이미지 URL 업데이트
+    @PatchMapping("/{id}/cover-update")
+    public Book updateBookWithCover(@PathVariable Long id, @RequestBody Book book) {
+        return bookService.updateBookWithCover(id, book);
     }
 
     // 좋아요 수 증가
