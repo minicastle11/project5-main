@@ -4,6 +4,7 @@ import com.aivle.miniproject5_backend.domain.Book;
 import com.aivle.miniproject5_backend.exception.BookNotFoundException;
 import com.aivle.miniproject5_backend.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +24,8 @@ public class BookService {
     // 모든 데이터
     @Transactional(readOnly = true)
     public List<Book> findAll() {
-        return bookRepository.findAll();
+        Sort sort = Sort.by("createdAt").descending();
+        return bookRepository.findAll(sort);
     }
 
     // 책 삭제
