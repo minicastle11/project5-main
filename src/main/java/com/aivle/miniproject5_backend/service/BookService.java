@@ -124,4 +124,12 @@ public class BookService {
         return bookRepository.save(existing);
     }
 
-}
+    @Transactional (readOnly = true)
+    public List<Book> findAllByViews() {
+        return bookRepository.findAllByOrderByViewsDesc();
+    }
+    @Transactional (readOnly = true)
+    public List<Book> findAllByLikes() {
+        return bookRepository.findAllByOrderByLikesDesc();
+    }
+ }

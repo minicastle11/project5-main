@@ -1,6 +1,7 @@
 package com.aivle.miniproject5_backend.exception;
 
 import com.aivle.miniproject5_backend.exception.BookNotFoundException;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -25,5 +26,11 @@ public class GlobalExceptionHandler {
         Map<String, String> body = Map.of("error", "Validation failed", "message", msg);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> handleGeneralException(Exception e) {
+        Map<String, String> body = Map.of("error", "Internal Server Error", "message", "서버 내부에서 에러 발생");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
 }

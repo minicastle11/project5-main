@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RequestMapping("/api/v1/books") // Request에 일일히 쓸 필요 없이 매핑
 @RestController
@@ -88,5 +87,16 @@ public class BookController {
         } else {
             return bookService.findAll();
         }
+    }
+
+    // 좋아요나 조회수 순으로 정렬
+    @GetMapping("/sort")
+    public List<Book> getSortedBooks(@RequestParam String type) {
+        if ("views".equals(type)) {
+            return bookService.findAllByViews();
+        } else if ("likes".equals(type)) {
+            return bookService.findAllByLikes();
+        }
+        return bookService.findAll();
     }
 }
