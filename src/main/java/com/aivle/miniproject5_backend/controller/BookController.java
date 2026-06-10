@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RequestMapping("/api/v1/books") // Request에 일일히 쓸 필요 없이 매핑
 @RestController
@@ -99,4 +100,21 @@ public class BookController {
         }
         return bookService.findAll();
     }
+
+    // 이미지 처리
+    // 생성
+    @PostMapping("/cover")
+    public ResponseEntity<Map<String, String>> makeImg(@RequestBody Book book,
+                                                       @RequestParam String apiKey,
+                                                       @RequestParam String imageSize
+                          ) {
+        String b64 = bookService.generateAndSaveImage(apiKey, book, imageSize);
+        return ResponseEntity.ok(Map.of("b64Json", b64));
+    }
+    // delete
+    // 삭제
+    // @DeleteMapping("/cover/{id}")
+
+    // book 업로드
+    // patch
 }
