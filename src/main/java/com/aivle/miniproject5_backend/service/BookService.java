@@ -93,7 +93,7 @@ public class BookService {
         if (book.getCategory() != null) {
             book.setCategory(book.getCategory());
         }
-        if (book.getCoverImageUrl() != null && book.getCoverImageUrl() != "/noImage.jpg") {
+        if (book.getCoverImageUrl() != null && book.getCoverImageUrl().startsWith("data:image")) {
             // 생성된 이미지 정보를 받아서, 백엔드 단의 저장소에 저장
             try {
                 String coverImageUrl = book.getCoverImageUrl();
@@ -136,9 +136,8 @@ public class BookService {
         if (book.getContent() != null) {
             existing.setContent(book.getContent());
         }
-        if (book.getCoverImageUrl() != null) {
+        if (book.getCoverImageUrl() != null && book.getCoverImageUrl().startsWith("data:image")) {
             existing.setCoverImageUrl(book.getCoverImageUrl());
-
         }
         return bookRepository.save(existing);
     }
@@ -172,7 +171,7 @@ public class BookService {
         if ( !book.getContent().equals(existing.getContent()) ) {
             existing.setContent(book.getContent());
         }
-        if (book.getCoverImageUrl() != null && book.getCoverImageUrl() != "/noImage.jpg") {
+        if (book.getCoverImageUrl() != null && !book.getCoverImageUrl().equals("/noImage.png")) {
             String oldImageUrl = existing.getCoverImageUrl();
             if(oldImageUrl != null && oldImageUrl.startsWith("/uploads/")) {
                 try {
