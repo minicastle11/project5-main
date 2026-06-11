@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RequestThrottleService {
 
     private static final long LIKE_COOLDOWN_MILLIS = 30_000;
-    private static final long VIEW_COOLDOWN_MILLIS = 15_000;
+    private static final long VIEW_COOLDOWN_MILLIS = 5_000;
 
     private final Map<String, Long> requestStore = new ConcurrentHashMap<>();
 
