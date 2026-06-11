@@ -140,6 +140,14 @@ public class BookController {
                 )).collect(Collectors.toList());
     }
 
+    @PostMapping("/category-recommend")
+    public ResponseEntity<Map<String, String>> recommendCategory(@RequestBody Map<String, String> body,
+                                                                 @RequestParam String apiKey) {
+        String category = bookService.recommendCategory(apiKey, body.get("title"), body.get("content"));
+        return ResponseEntity.ok(Map.of("category", category));
+    }
+
+
     private String extractClientIp(HttpServletRequest request) {
         String forwarded = request.getHeader("X-Forwarded-For");
 

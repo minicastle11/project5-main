@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +45,14 @@ public class BookService {
     // 페이징
     @Transactional(readOnly = true)
     public Page<Book> findPage(int page, int size, String sortBy) {
-        Sort sort = Sort.by(sortBy).descending();
+        Sort sort;
+
+        if ("views".equals(sortBy) || "likes".equals(sortBy) || "createdAt".equals(sortBy)) {
+            sort = Sort.by(Sort.Order.desc(sortBy), Sort.Order.desc("id"));
+        } else {
+            sort = Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id"));
+        }
+
         Pageable pageable = PageRequest.of(page, size, sort);
         return bookRepository.findAll(pageable);
     }
@@ -248,6 +256,40 @@ public class BookService {
         // 파일 저장
         return response.data().get(0).b64Json();
     }
+
+    // 카테고리 ai 자동 추천
+    public String recommendCategory(String apiKey, String title, String content) {
+        String categoryList = Arrays.stream(Category.values())
+                .map(c -> c.getDescription())
+                .collect(Collectors.joining(", "));
+
+        OpenAiChatResponse response = restClient.post()
+                .uri("https://api.openai.com/v1/chat/completions")
+                .header("Authorization", "Bearer " + apiKey)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of(
+                        "model", "gpt-4o-mini",
+                        "max_tokens", 50,
+                        "messages", List.of(Map.of(
+                                "role", "user",
+                                "content", "다음 책에 가장 어울리는 카테고리를 아래 목록에서 하나만 골라 그대로 출력해. " +
+                                        "다른 말은 절대 하지 마.\n" +
+                                        "목록: " + categoryList + "\n" +
+                                        "제목: " + title + "\n" +
+                                        "내용: " + content
+                        ))
+                ))
+                .retrieve().body(OpenAiChatResponse.class);
+
+        return response.choices().get(0).message().content().trim();
+    }
+
+    public record OpenAiChatResponse(List<Choice> choices) {
+        public record Choice(Message message) {}
+        public record Message(String content) {}
+    }
+
+
 
     public String saveImage(String b64Json, Long id) {
         try {
