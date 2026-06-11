@@ -46,8 +46,6 @@ public class BookService {
     @Transactional(readOnly = true)
     public Page<Book> findPage(int page, int size, String sortBy, String category) {
         Sort sort = Sort.by(sortBy).descending();
-    public Page<Book> findPage(int page, int size, String sortBy) {
-        Sort sort;
 
         if ("views".equals(sortBy) || "likes".equals(sortBy) || "createdAt".equals(sortBy)) {
             sort = Sort.by(Sort.Order.desc(sortBy), Sort.Order.desc("id"));
