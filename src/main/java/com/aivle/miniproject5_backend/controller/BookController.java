@@ -3,6 +3,8 @@ package com.aivle.miniproject5_backend.controller;
 import com.aivle.miniproject5_backend.domain.Book;
 import com.aivle.miniproject5_backend.domain.Category;
 import com.aivle.miniproject5_backend.service.BookService;
+import com.aivle.miniproject5_backend.service.RequestThrottleService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "http://localhost:5173")
 public class BookController {
     private final BookService bookService;
+    private final RequestThrottleService requestThrottleService;
 
     // 하나의 책
     @GetMapping("/{id}")
@@ -69,14 +72,28 @@ public class BookController {
 
     // 좋아요 수 증가
     @PatchMapping("/{id}/likes")
-    public ResponseEntity<Book> addLikes(@PathVariable Long id) {
+    public ResponseEntity<?> addLikes(@PathVariable Long id, HttpServletRequest request) {
+        String clientIp = extractClientIp(request);
+
+        if (!requestThrottleService.canIncreaseLike(id, clientIp)) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(Map.of("message", "좋아요는 잠시 후 다시 시도해주세요."));
+        }
+
         Book updatedBook = bookService.addLikes(id);
         return ResponseEntity.ok(updatedBook);
     }
 
     // 조회 수 증가
     @PatchMapping("/{id}/views")
-    public ResponseEntity<Book> addViews(@PathVariable Long id) {
+    public ResponseEntity<?> addViews(@PathVariable Long id, HttpServletRequest request) {
+        String clientIp = extractClientIp(request);
+
+        if (!requestThrottleService.canIncreaseView(id, clientIp)) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(Map.of("message", "조회수는 잠시 후 다시 반영됩니다."));
+        }
+
         Book updatedBook = bookService.addViews(id);
         return ResponseEntity.ok(updatedBook);
     }
@@ -121,6 +138,16 @@ public class BookController {
         return Arrays.stream(Category.values()).map(category ->
                 Map.of("name", category.name(), "description", category.getDescription()
                 )).collect(Collectors.toList());
+    }
+
+    private String extractClientIp(HttpServletRequest request) {
+        String forwarded = request.getHeader("X-Forwarded-For");
+
+        if (forwarded != null && !forwarded.isBlank()) {
+            return forwarded.split(",")[0].trim();
+        }
+
+        return request.getRemoteAddr();
     }
     // delete
     // 삭제
