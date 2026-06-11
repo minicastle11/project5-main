@@ -171,7 +171,7 @@ public class BookService {
         if ( !book.getContent().equals(existing.getContent()) ) {
             existing.setContent(book.getContent());
         }
-        if (book.getCoverImageUrl() != null && !book.getCoverImageUrl().equals("/noImage.png")) {
+        if (book.getCoverImageUrl() != null && book.getCoverImageUrl().startsWith("data:image")) {
             String oldImageUrl = existing.getCoverImageUrl();
             if(oldImageUrl != null && oldImageUrl.startsWith("/uploads/")) {
                 try {
