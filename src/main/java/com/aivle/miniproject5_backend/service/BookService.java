@@ -44,7 +44,14 @@ public class BookService {
     // 페이징
     @Transactional(readOnly = true)
     public Page<Book> findPage(int page, int size, String sortBy) {
-        Sort sort = Sort.by(sortBy).descending();
+        Sort sort;
+
+        if ("views".equals(sortBy) || "likes".equals(sortBy) || "createdAt".equals(sortBy)) {
+            sort = Sort.by(Sort.Order.desc(sortBy), Sort.Order.desc("id"));
+        } else {
+            sort = Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id"));
+        }
+
         Pageable pageable = PageRequest.of(page, size, sort);
         return bookRepository.findAll(pageable);
     }
