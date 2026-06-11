@@ -1,6 +1,7 @@
 package com.aivle.miniproject5_backend.controller;
 
 import com.aivle.miniproject5_backend.domain.Book;
+import com.aivle.miniproject5_backend.domain.Category;
 import com.aivle.miniproject5_backend.service.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -9,12 +10,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequestMapping("/api/v1/books") // Request에 일일히 쓸 필요 없이 매핑
 @RestController
 @RequiredArgsConstructor // 생성자를 만들어 줌
+@CrossOrigin(origins = "http://localhost:5173")
 public class BookController {
     private final BookService bookService;
 
@@ -110,6 +114,13 @@ public class BookController {
                           ) {
         String b64 = bookService.generateAndSaveImage(apiKey, book, imageSize);
         return ResponseEntity.ok(Map.of("b64Json", b64));
+    }
+
+    @GetMapping("/categories")
+    public List<Map<String, String>> getCategories() {
+        return Arrays.stream(Category.values()).map(category ->
+                Map.of("name", category.name(), "description", category.getDescription()
+                )).collect(Collectors.toList());
     }
     // delete
     // 삭제

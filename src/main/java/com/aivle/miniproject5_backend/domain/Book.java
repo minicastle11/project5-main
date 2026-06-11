@@ -52,4 +52,7 @@ public class Book {
     // 업데이트되면 날짜 자동으로 변경
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    @Enumerated(EnumType.STRING)
+    private Category category;
 }

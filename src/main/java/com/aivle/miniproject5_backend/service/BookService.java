@@ -1,6 +1,7 @@
 package com.aivle.miniproject5_backend.service;
 
 import com.aivle.miniproject5_backend.domain.Book;
+import com.aivle.miniproject5_backend.domain.Category;
 import com.aivle.miniproject5_backend.exception.BookNotFoundException;
 import com.aivle.miniproject5_backend.repository.BookRepository;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -88,6 +89,10 @@ public class BookService {
     public Book create(Book book) {
         if (book.getLikes() == null) book.setLikes(0);
         if (book.getViews() == null) book.setViews(0);
+        // 카테고리 추가
+        if (book.getCategory() != null) {
+            book.setCategory(book.getCategory());
+        }
         if (book.getCoverImageUrl() != null && book.getCoverImageUrl() != "/noImage.jpg") {
             // 생성된 이미지 정보를 받아서, 백엔드 단의 저장소에 저장
             try {
@@ -109,6 +114,11 @@ public class BookService {
         }
 
         return bookRepository.save(book);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Book> searchByCategory(Category category) {
+        return bookRepository.findByCategory(category);
     }
 
     // 책 업데이트
