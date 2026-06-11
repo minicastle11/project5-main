@@ -44,6 +44,8 @@ public class BookService {
     }
     // 페이징
     @Transactional(readOnly = true)
+    public Page<Book> findPage(int page, int size, String sortBy, String category) {
+        Sort sort = Sort.by(sortBy).descending();
     public Page<Book> findPage(int page, int size, String sortBy) {
         Sort sort;
 
@@ -54,6 +56,9 @@ public class BookService {
         }
 
         Pageable pageable = PageRequest.of(page, size, sort);
+        if (category != null && !category.isEmpty()) {
+            return bookRepository.findByCategory(Category.valueOf(category), pageable);
+        }
         return bookRepository.findAll(pageable);
     }
 
@@ -286,7 +291,7 @@ public class BookService {
     // 카테고리 ai 자동 추천
     public String recommendCategory(String apiKey, String title, String content) {
         String categoryList = Arrays.stream(Category.values())
-                .map(c -> c.getDescription())
+                .map(c -> c.name())
                 .collect(Collectors.joining(", "));
 
         OpenAiChatResponse response = restClient.post()

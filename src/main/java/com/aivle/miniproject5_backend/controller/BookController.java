@@ -40,8 +40,9 @@ public class BookController {
     @GetMapping("/page")
     public Page<Book> getPage(@RequestParam(defaultValue="0") int page,
                               @RequestParam(defaultValue="8") int size,
-                              @RequestParam(defaultValue="createdAt") String sortBy) {
-        return bookService.findPage(page, size, sortBy);
+                              @RequestParam(defaultValue="createdAt") String sortBy,
+                              @RequestParam(required=false) String category) {
+        return bookService.findPage(page, size, sortBy, category);
     }
 
     // 삭제
@@ -145,6 +146,11 @@ public class BookController {
                                                                  @RequestParam String apiKey) {
         String category = bookService.recommendCategory(apiKey, body.get("title"), body.get("content"));
         return ResponseEntity.ok(Map.of("category", category));
+    }
+
+    @GetMapping("/category")
+    public List<Book> getBooksByCategory(@RequestParam String category) {
+        return bookService.searchByCategory(Category.valueOf(category));
     }
 
 
