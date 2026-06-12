@@ -225,25 +225,26 @@ Base URL: http://localhost:8080/api/v1/books
 
 ---
 
-# 8. 백엔드 개발 과정
+# 8. 예외 처리 (Exception Handling)
 
-## 8.1 개발 환경 구성 및 설정
+안정적인 API 서비스 제공과 프론트엔드에서의 명확한 에러 핸들링을 위해 전역 예외 처리 메커니즘을 구현했습니다.
 
-- Spring Initializr를 통한 프로젝트 생성
-- `application.yaml` 설정 (포트, H2 DB 설정, JPA 설정)
+## 8.1 전역 예외 처리기 (@RestControllerAdvice)
 
-## 8.2 Entity 및 Repository 구현
+`GlobalExceptionHandler` 클래스를 통해 컨트롤러 계층에서 발생하는 예외를 한 곳에서 포착하여 일관된 형식의 JSON 응답을 클라이언트에게 반환합니다.
 
-- 데이터베이스 테이블과 매핑되는 `Book` 엔티티 클래스 생성
-- JPA 자동 생성 시간 관리를 위한 `AuditingEntityListener` 및 `@CreatedDate`, `@LastModifiedDate` 적용
-- JpaRepository를 상속받는 `BookRepository` 인터페이스 생성 및 커스텀 검색 메서드(`findByTitleContaining`, `findByAuthorContaining`, `findByCategory` 등) 추가
+## 8.2 커스텀 예외 클래스
 
-## 8.3 Service 레이어 구현
+특정 상황에 맞는 예외를 명확히 구분하기 위해 `RuntimeException`을 상속받은 커스텀 예외 클래스들을 정의했습니다.
 
-- `BookService` 클래스를 생성하여 비즈니스 로직 캡슐화 및 트랜잭션(`@Transactional`) 범위 설정
-- 파일 저장 로직(Base64 디코딩 후 로컬 경로 저장) 및 OpenAI 이미지 생성 API 직접 연동(`RestClient` 활용) 구현
+- **`BookNotFoundException`**: 
+  - 발생 상황: 클라이언트가 존재하지 않는 도서 ID로 조회, 수정, 삭제 요청을 보낼 때 발생합니다.
+  - 응답: HTTP 상태 코드 `404 Not Found`와 함께 "해당 ID의 도서를 찾을 수 없습니다."라는 메시지를 반환합니다.
+- **`CommentNotFoundException`**:
+  - 발생 상황: 존재하지 않는 댓글 ID에 대한 작업 요청 시 발생합니다.
+  - 응답: HTTP 상태 코드 `404 Not Found` 처리를 담당합니다.
 
-## 8.4 Controller 구현 및 RESTful 설계
+## 8.3 유효성 검사 예외 (@Valid)
 
-- `@RestController`를 기반으로 자원 지향적인 엔드포인트(`@RequestMapping("/api/v1/books")`) 설계
-- HTTP 메서드(`@GetMapping`, `@PostMapping`, `@PatchMapping`, `@DeleteMapping`)를 적절히 분리하여 REST 원칙 준수
+- 클라이언트가 잘못된 형식의 데이터(예: 빈 제목, 누락된 작가명)를 전송할 때 발생하는 `MethodArgumentNotValidException`을 처리합니다.
+- HTTP 상태 코드 `400 Bad Request`와 함께 어떤 필드에서 검증이 실패했는지 명확한 에러 메시지를 반환하여 프론트엔드 개발자가 쉽게 대응할 수 있도록 돕습니다.
