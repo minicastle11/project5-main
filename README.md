@@ -393,29 +393,15 @@ Base URL: http://localhost:8080/api/v1/books/{bookId}/comments
 
 ---
 
-# 8. 주요 트러블슈팅 및 고려사항
-
-## 8.1 대용량 Base64 이미지 처리
-
-**이슈**: 프론트엔드에서 생성된 Base64 이미지를 DB에 저장할 때 문자열 길이가 너무 길어 기본 길이를 초과하는 문제 발생.
-**해결**: `Book` 엔티티의 `content` 및 `coverImageUrl` 필드에 `@Lob`과 `@Column(columnDefinition = "MEDIUMTEXT")` 매핑을 적용하여 대용량 문자열을 저장할 수 있도록 처리했습니다.
-
-## 8.2 카테고리(Category) 데이터 업데이트 누락
-
-**이슈**: 클라이언트에서 도서 정보 수정 시 카테고리 정보를 전송하지만 DB에 반영되지 않음.
-**해결**: `BookService.java`의 `update` 메서드 로직을 수정하여 클라이언트로부터 전달받은 `Category` 데이터가 존재할 경우 기존 엔티티에 병합되도록 업데이트 로직(`existing.setCategory(book.getCategory());`)을 추가했습니다.
-
----
-
-# 9. 예외 처리 (Exception Handling)
+# 8. 예외 처리 (Exception Handling)
 
 안정적인 API 서비스 제공과 프론트엔드에서의 명확한 에러 핸들링을 위해 전역 예외 처리 메커니즘을 구현했습니다.
 
-## 9.1 전역 예외 처리기 (@RestControllerAdvice)
+## 8.1 전역 예외 처리기 (@RestControllerAdvice)
 
 `GlobalExceptionHandler` 클래스를 통해 컨트롤러 계층에서 발생하는 예외를 한 곳에서 포착하여 일관된 형식의 JSON 응답을 클라이언트에게 반환합니다.
 
-## 9.2 커스텀 예외 클래스
+## 8.2 커스텀 예외 클래스
 
 특정 상황에 맞는 예외를 명확히 구분하기 위해 `RuntimeException`을 상속받은 커스텀 예외 클래스들을 정의했습니다.
 
@@ -426,7 +412,7 @@ Base URL: http://localhost:8080/api/v1/books/{bookId}/comments
   - 발생 상황: 존재하지 않는 댓글 ID에 대한 작업 요청 시 발생합니다.
   - 응답: HTTP 상태 코드 `404 Not Found` 처리를 담당합니다.
 
-## 9.3 유효성 검사 예외 (@Valid)
+## 8.3 유효성 검사 예외 (@Valid)
 
 - 클라이언트가 잘못된 형식의 데이터(예: 빈 제목, 누락된 작가명)를 전송할 때 발생하는 `MethodArgumentNotValidException`을 처리합니다.
 - HTTP 상태 코드 `400 Bad Request`와 함께 어떤 필드에서 검증이 실패했는지 명확한 에러 메시지를 반환하여 프론트엔드 개발자가 쉽게 대응할 수 있도록 돕습니다.
