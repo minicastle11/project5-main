@@ -149,26 +149,34 @@ public class BookService {
         if (book.getCategory() != null) {
             existing.setCategory(book.getCategory());
         }
-        if (book.getCoverImageUrl() != null && !book.getCoverImageUrl().equals("/noImage.jpg") && !book.getCoverImageUrl().equals(existing.getCoverImageUrl())) {
+        String newImageUrl = book.getCoverImageUrl();
+
+        if (
+                newImageUrl != null
+                        && !newImageUrl.equals("/noImage.jpg")
+                        && !newImageUrl.equals(existing.getCoverImageUrl())
+                        && newImageUrl.startsWith("data:image/")
+        ) {
             String oldImageUrl = existing.getCoverImageUrl();
-            if(oldImageUrl != null && oldImageUrl.startsWith("/uploads/")) {
+
+            if (oldImageUrl != null && oldImageUrl.startsWith("/uploads/")) {
                 try {
-                    Path oldPath = Paths.get(oldImageUrl.substring(1)); //앞의 "/" 제거
+                    Path oldPath = Paths.get(oldImageUrl.substring(1));
                     Files.deleteIfExists(oldPath);
                 } catch (IOException e) {
                     System.out.println("삭제할려는 주소값은 없습니다.");
                 }
             }
-            // 생성된 이미지 정보를 받아서, 백엔드 단의 저장소에 저장
+
             try {
-                String coverImageUrl = book.getCoverImageUrl();
-                String base64Data = coverImageUrl.contains(",")
-                        ? coverImageUrl.split(",")[1]   // "data:image/png;base64," 제거
-                        : coverImageUrl;
+                String base64Data = newImageUrl.contains(",")
+                        ? newImageUrl.split(",")[1]
+                        : newImageUrl;
 
                 byte[] imageBytes = Base64.getDecoder().decode(base64Data);
-                String filename = UUID.randomUUID() + ".png"; //id 생성 전이라 UUID로 식별화
+                String filename = UUID.randomUUID() + ".png";
                 Path path = Paths.get("uploads/images/" + filename);
+
                 Files.createDirectories(path.getParent());
                 Files.write(path, imageBytes);
 
