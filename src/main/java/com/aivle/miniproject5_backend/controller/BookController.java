@@ -150,10 +150,10 @@ public class BookController {
                                                                  @RequestParam String apiKey) {
         if (apiKey == null || apiKey.isBlank()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "Missing API Key", "message", "API Key가 입력되지 않았습니다."));
+                    .body(Map.of("error", "Missing API Key", "message", "API Key를 입력해주세요."));
         }
-        String category = bookService.recommendCategory(apiKey, body.get("title"), body.get("content"));
-        return ResponseEntity.ok(Map.of("category", category));
+        Map<String, String> result = bookService.recommendCategory(apiKey, body.get("title"), body.get("content"));
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/category")

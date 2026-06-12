@@ -287,7 +287,7 @@ public class BookService {
     }
 
     // 카테고리 ai 자동 추천
-    public String recommendCategory(String apiKey, String title, String content) {
+    public Map<String, String> recommendCategory(String apiKey, String title, String content) {
         String categoryList = Arrays.stream(Category.values())
                 .map(Category::getDescription)
                 .collect(Collectors.joining(", "));
@@ -312,10 +312,12 @@ public class BookService {
                 .retrieve().body(OpenAiChatResponse.class);
 
         String aiResult = response.choices().get(0).message().content().trim();
-
         Category matchedCategory = Category.fromDescription(aiResult);
 
-        return matchedCategory.getDescription();
+        return Map.of(
+                "category", matchedCategory.getDescription(),
+                "categoryName", matchedCategory.name()
+        );
     }
 
     public record OpenAiChatResponse(List<Choice> choices) {
