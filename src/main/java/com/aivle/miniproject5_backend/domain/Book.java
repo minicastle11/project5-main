@@ -53,6 +53,7 @@ public class Book {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
+    // 카테고리
     @Enumerated(EnumType.STRING)
     private Category category;
 }
