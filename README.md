@@ -110,23 +110,14 @@ Spring Boot Backend
 
 ---
 
-## 4.2 프로젝트 클론 및 빌드
+## 4.2 프로젝트 클론 및 빌드 및 백엔드 서버 실행
 
 ```bash
-# 프로젝트 루트 폴더에서 진행
-./gradlew build
+# IntelliJ IDEA에서 실행
+java/com/aivle/miniproject5_backend/Miniproject5BackendApplication.java 실행
 ```
 
----
-
-## 4.3 백엔드 서버 실행
-
-```bash
-# IDE에서 메인 클래스 실행 또는 터미널 명령
-./gradlew bootRun
-```
-
-기본 접속 주소:
+백엔드 접속 주소:
 
 ```text
 http://localhost:8080
@@ -134,7 +125,7 @@ http://localhost:8080
 
 ---
 
-## 4.4 H2 데이터베이스 콘솔 접속
+## 4.3 H2 데이터베이스 콘솔 접속
 
 브라우저를 통해 내장된 H2 콘솔에 접속하여 직접 데이터를 확인할 수 있습니다.
 
@@ -145,7 +136,7 @@ http://localhost:8080
 
 ---
 
-## 4.5 실행 체크리스트
+## 4.4 실행 체크리스트
 
 - [ ] Java 17 버전 확인
 - [ ] `./gradlew bootRun` 정상 실행 (포트 8080)
@@ -215,6 +206,11 @@ Base URL: http://localhost:8080/api/v1/books
 
 ---
 
+# 6.1 ERD 설계 
+
+![ERD 설계도](ReadMEIMG/ERD설계.png)
+
+---
 # 7. 주요 트러블슈팅 및 고려사항
 
 ## 7.1 대용량 Base64 이미지 처리
