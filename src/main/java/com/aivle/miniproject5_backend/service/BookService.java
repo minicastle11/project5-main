@@ -258,31 +258,33 @@ public class BookService {
 
 
     public String generateAndSaveImage(String apiKey, Book book, String imageSize) {
+        String prompt = """
+                # 역할
+                너는 북커버 제작 담당자야.
+
+                # 지침
+                - 북커버의 앞면 표지만을 보여줄 것
+                - 전문적인 북커버 디자인, 높은 퀄리티의 일러스트레이션, 두드러진 시각적 표현
+                - 이야기의 분위기나 무드를 포함
+
+                # 책 정보
+                - 제목: %s
+                - 내용 요약: %s
+                """.formatted(book.getTitle(), book.getContent());
+
         OpenAiResponse response = restClient.post()
                 .uri("https://api.openai.com/v1/images/generations")
                 .header("Authorization", "Bearer " + apiKey)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Map.of(
                         "model", "gpt-image-2",
-                        "prompt", """
-                                # 역할
-                                    너는 북커버 제작 담당자야.
-                                
-                                    # 지침
-                                    - 북커버의 앞면 표지만을 보여줄 것
-                                    - 전문적인 북커버 디자인, 높은 퀄리티의 일러스트레이션, 두드러진 시각적 표현, 작품에 적합한 안전성
-                                    - 이야기의 분위기나 무드를 포함
-                                
-                                    # 책 정보
-                                    - 제목 : """ + book.getTitle() + "\n" +
-                                    "- 내용 요약 :" +  book.getContent()
-                                ,
+                        "prompt", prompt,
                         "n", 1,
                         "size", imageSize
                 ))
                 .retrieve()
                 .body(OpenAiResponse.class);
-        // 파일 저장
+
         return response.data().get(0).b64Json();
     }
 
