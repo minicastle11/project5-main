@@ -2,7 +2,7 @@
 
 프론트엔드 React 애플리케이션과 연동하여 데이터의 영속성을 제공하는 Spring Boot 기반의 백엔드 시스템입니다.
 
-도서 데이터의 등록, 목록 조회, 검색, 수정, 삭제(CRUD) 요청을 처리하며, 프론트엔드에서 생성한 Base64 형식의 AI 표지 이미지 데이터를 데이터베이스에 안정적으로 저장하고 제공합니다.
+도서 및 댓글 데이터의 등록, 목록 조회, 검색, 수정, 삭제(CRUD) 요청을 처리하며, 프론트엔드에서 생성한 Base64 형식의 AI 표지 이미지 데이터를 데이터베이스에 안정적으로 저장하고 제공합니다.
 
 본 프로젝트는 KT AIVLE School AI 트랙 미니프로젝트 5차 과제인  
 **도서관리시스템 개발 (백엔드 통합)** 을 기반으로 진행했습니다.
@@ -19,7 +19,7 @@
 
 ## 1.2 프로젝트 목적
 
-기존 `json-server`를 대체하여, 확장 가능하고 안정적인 Spring Boot 기반의 RESTful API 서버를 구축합니다. 프론트엔드 애플리케이션과 연동하여 도서 데이터를 RDBMS에 안전하게 관리하는 것을 목표로 합니다.
+기존 `json-server`를 대체하여, 확장 가능하고 안정적인 Spring Boot 기반의 RESTful API 서버를 구축합니다. 프론트엔드 애플리케이션과 연동하여 도서 및 댓글 데이터를 RDBMS에 안전하게 관리하는 것을 목표로 합니다.
 
 ---
 
@@ -34,14 +34,12 @@
 ## 1.4 주요 기능
 
 - **RESTful API 제공**: 프론트엔드 통신을 위한 표준 API 엔드포인트 제공
-- **도서 데이터 영속화**: H2 데이터베이스(파일 기반)를 활용한 영구적인 데이터 저장
+- **데이터 영속화**: H2 데이터베이스(파일 기반)를 활용한 영구적인 데이터 저장
 - **CORS 설정**: 프론트엔드(React) 환경에서의 API 접근 허용
 - **도서 CRUD 처리**:
-  - 도서 목록 전체 조회 (`findAll`)
-  - 도서 제목 기준 검색 (`findByTitleContaining`)
-  - 도서 등록 (`create`)
-  - 도서 수정 (`update` - 조회수, 좋아요, 정보 수정)
-  - 도서 삭제 (`deleteById`)
+  - 도서 목록 전체 조회, 제목/작가/카테고리 검색, 등록, 수정, 삭제
+- **댓글 CRUD 처리**:
+  - 특정 도서의 댓글 목록 조회, 등록, 수정, 삭제
 
 ---
 
@@ -94,10 +92,10 @@ Spring Boot Backend
 
 ## 3.1 핵심 구조
 
-- `Controller`: 클라이언트(React)의 HTTP 요청을 받고, 응답을 JSON 형태로 반환합니다.
-- `Service`: 컨트롤러와 리포지토리 사이에서 비즈니스 로직을 수행하며 트랜잭션을 관리합니다.
+- `Controller`: 클라이언트(React)의 HTTP 요청을 받고, 응답을 JSON 형태로 반환합니다. (`BookController`, `CommentController`)
+- `Service`: 컨트롤러와 리포지토리 사이에서 비즈니스 로직을 수행하며 트랜잭션을 관리합니다. (`BookService`, `CommentService`)
 - `Repository`: `JpaRepository`를 상속받아 데이터베이스의 기본적인 CRUD 메서드를 제공받습니다.
-- `Domain (Entity)`: 데이터베이스 테이블과 매핑되는 자바 객체입니다 (`Book.java`).
+- `Domain (Entity)`: 데이터베이스 테이블과 매핑되는 자바 객체입니다 (`Book.java`, `Comment.java`).
 
 ---
 
@@ -139,7 +137,7 @@ http://localhost:8080
 ## 4.4 실행 체크리스트
 
 - [ ] Java 17 버전 확인
-- [ ] `./gradlew bootRun` 정상 실행 (포트 8080)
+- [ ] 인텔리제이 정상 실행 (포트 8080)
 - [ ] 프론트엔드 환경 파일(예: `.env`)의 API_URL을 `http://localhost:8080`으로 변경 (json-server 포트 3000 사용 중지)
 - [ ] H2 콘솔 정상 접속 확인
 
@@ -147,49 +145,58 @@ http://localhost:8080
 
 # 5. API 명세 및 RESTful API 근거
 
-본 백엔드 시스템의 API는 `BookController`를 통해 **REST(Representational State Transfer) 아키텍처 스타일**을 준수하여 설계되었습니다.
+본 백엔드 시스템의 API는 **REST(Representational State Transfer) 아키텍처 스타일**을 준수하여 설계되었습니다.
 
 ## 5.1 RESTful 설계 근거
 
 1.  **자원(Resource) 기반의 URI**:
-    - 모든 API 엔드포인트는 행위(동사)가 아닌 자원(명사)인 `/api/v1/books`를 기본 경로(`@RequestMapping`)로 사용합니다.
-    - 예: 특정 도서를 지칭할 때 `/api/v1/books/{id}`와 같이 직관적인 경로를 사용합니다.
+    - 모든 API 엔드포인트는 행위(동사)가 아닌 자원(명사)인 `/api/v1/books`, `/api/v1/books/{bookId}/comments` 등을 기본 경로로 사용합니다.
 2.  **HTTP 메서드를 통한 행위 표현**:
     - 리소스에 대한 행위(CRUD)는 URI에 명시하지 않고, HTTP 메서드(GET, POST, PATCH, DELETE)를 통해 명확히 구분합니다.
-      - **GET**: 도서 목록 조회 (`@GetMapping`) 및 단건 조회 (`@GetMapping("/{id}")`)
-      - **POST**: 새로운 도서 생성 (`@PostMapping`)
-      - **PATCH**: 도서 정보의 부분 수정 (`@PatchMapping("/{id}")`)
-      - **DELETE**: 도서 삭제 (`@DeleteMapping("/{id}")`)
 3.  **적절한 HTTP 상태 코드 반환**:
-    - 요청의 결과에 따라 적절한 상태 코드를 반환하여 클라이언트가 처리 결과를 명확히 알 수 있도록 합니다.
-      - 리소스 생성 성공 시: `201 Created` (`HttpStatus.CREATED`)
-      - 리소스 삭제 성공 시: `204 No Content` (`ResponseEntity.noContent().build()`)
-      - 정상 처리 시: `200 OK` (기본값 또는 `ResponseEntity.ok()`)
+    - 요청의 결과에 따라 `200 OK`, `201 Created`, `204 No Content`, `404 Not Found` 등 적절한 상태 코드를 반환합니다.
 4.  **표현(Representation) 전달**:
-    - 클라이언트와 서버 간의 데이터 교환은 JSON 형식을 사용하며, `@RequestBody`와 `@ResponseBody`(또는 `@RestController` 포함)를 통해 직렬화/역직렬화됩니다.
+    - 클라이언트와 서버 간의 데이터 교환은 JSON 형식을 사용합니다.
 
 ## 5.2 주요 엔드포인트 요약
+
+### Book API
 
 ```text
 Base URL: http://localhost:8080/api/v1/books
 ```
 
-| 기능 | Method | Endpoint | 설명 | 상태 코드 |
-|---|---|---|---|---|
-| 전체 목록 조회 | GET | `/` | DB에 저장된 모든 도서 목록 반환 | 200 OK |
-| 단건 도서 조회 | GET | `/{id}` | 특정 ID의 도서 상세 정보 반환 | 200 OK |
-| 도서 검색 | GET | `/search?title={keyword}` | 조건(제목, 작가)에 맞는 도서 검색 | 200 OK |
-| 도서 등록 | POST | `/` | 새로운 도서 정보 저장 | 201 Created |
-| 도서 정보 수정 | PATCH | `/{id}` | 기존 도서의 부분 정보 업데이트 | 200 OK |
-| 조회수 증가 | PATCH | `/{id}/views` | 특정 도서의 조회수 1 증가 | 200 OK |
-| 좋아요 증가 | PATCH | `/{id}/likes` | 특정 도서의 좋아요 수 1 증가 | 200 OK |
-| 도서 삭제 | DELETE | `/{id}` | 특정 ID의 도서 삭제 | 204 No Content |
+| 기능 | Method | Endpoint | 설명 |
+|---|---|---|---|
+| 전체 목록 조회 | GET | `/` | 모든 도서 목록 반환 |
+| 단건 도서 조회 | GET | `/{id}` | 특정 ID의 도서 상세 정보 반환 |
+| 도서 검색 | GET | `/search?title={keyword}` | 조건(제목, 작가)에 맞는 도서 검색 |
+| 도서 등록 | POST | `/` | 새로운 도서 정보 저장 |
+| 도서 정보 수정 | PATCH | `/{id}` | 기존 도서의 부분 정보 업데이트 |
+| 도서 삭제 | DELETE | `/{id}` | 특정 ID의 도서 삭제 |
+
+### Comment API
+
+```text
+Base URL: http://localhost:8080/api/v1/books/{bookId}/comments
+```
+
+| 기능 | Method | Endpoint | 설명 |
+|---|---|---|---|
+| 댓글 목록 조회 | GET | `/` | 특정 도서의 모든 댓글 목록 조회 |
+| 댓글 등록 | POST | `/` | 특정 도서에 새로운 댓글 등록 |
+| 댓글 수정 | PATCH | `/{commentId}` | 특정 댓글 내용 수정 |
+| 댓글 삭제 | DELETE | `/{commentId}` | 특정 댓글 삭제 |
 
 ---
 
 # 6. 데이터베이스 스키마 (Entity 구조)
 
-`Book` 엔티티 구조 (`book` 테이블)
+## 6.1 Entity 관계
+
+- **Book : Comment = 1 : N**: 하나의 책은 여러 개의 댓글을 가질 수 있습니다. `Comment` 테이블이 `book_id` 외래 키를 가집니다.
+
+## 6.2 `Book` 엔티티
 
 | 필드명 | 타입 | 제약 조건 | 설명 |
 |---|---|---|---|
@@ -197,18 +204,25 @@ Base URL: http://localhost:8080/api/v1/books
 | `title` | VARCHAR(200) | NOT NULL | 도서 제목 |
 | `author` | VARCHAR(255) | NOT NULL | 작가 이름 |
 | `content` | MEDIUMTEXT | NOT NULL | 도서 내용 |
-| `likes` | INT | DEFAULT 0 | 좋아요 수 |
-| `views` | INT | DEFAULT 0 | 조회수 |
-| `cover_image_url`| MEDIUMTEXT | | 표지 이미지 경로 및 Base64 |
 | `category` | VARCHAR(255) | ENUM | 도서 카테고리 |
-| `created_at` | DATETIME | NOT NULL, UPDATABLE=FALSE | 등록일시 |
+| ... | ... | ... | ... |
+
+## 6.3 `Comment` 엔티티
+
+| 필드명 | 타입 | 제약 조건 | 설명 |
+|---|---|---|---|
+| `id` | BIGINT | PK, AUTO_INCREMENT | 댓글 고유 ID |
+| `book_id` | BIGINT | FK, NOT NULL | `Book` 테이블 참조 외래 키 |
+| `writer` | VARCHAR(50) | NOT NULL | 댓글 작성자 |
+| `content` | VARCHAR(1000) | NOT NULL | 댓글 내용 |
+| `created_at` | DATETIME | NOT NULL | 등록일시 |
 | `updated_at` | DATETIME | | 수정일시 |
 
 ---
 
-# 6.1 ERD 설계 
+# 6.4 ERD 설계
 
-![ERD 설계도](ReadMEIMG/ERD설계.png)
+![ERD 설계도](ReadMEIMG/ERD설계2.png)
 
 ---
 # 7. 주요 트러블슈팅 및 고려사항
