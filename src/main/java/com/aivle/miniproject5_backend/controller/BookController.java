@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/books") // Request에 일일히 쓸 필요 없이 매핑
 @RestController
 @RequiredArgsConstructor // 생성자를 만들어 줌
-@CrossOrigin(origins = "http://localhost:5173")
 public class BookController {
     private final BookService bookService;
     private final RequestThrottleService requestThrottleService;
