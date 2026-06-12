@@ -289,7 +289,7 @@ public class BookService {
     // 카테고리 ai 자동 추천
     public String recommendCategory(String apiKey, String title, String content) {
         String categoryList = Arrays.stream(Category.values())
-                .map(c -> c.name())
+                .map(Category::getDescription)
                 .collect(Collectors.joining(", "));
 
         OpenAiChatResponse response = restClient.post()
@@ -298,7 +298,8 @@ public class BookService {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Map.of(
                         "model", "gpt-4o-mini",
-                        "max_tokens", 50,
+                        "temperature", 0.1,
+                        "max_tokens", 20,
                         "messages", List.of(Map.of(
                                 "role", "user",
                                 "content", "다음 책에 가장 어울리는 카테고리를 아래 목록에서 하나만 골라 그대로 출력해. " +
@@ -310,7 +311,11 @@ public class BookService {
                 ))
                 .retrieve().body(OpenAiChatResponse.class);
 
-        return response.choices().get(0).message().content().trim();
+        String aiResult = response.choices().get(0).message().content().trim();
+
+        Category matchedCategory = Category.fromDescription(aiResult);
+
+        return matchedCategory.getDescription();
     }
 
     public record OpenAiChatResponse(List<Choice> choices) {

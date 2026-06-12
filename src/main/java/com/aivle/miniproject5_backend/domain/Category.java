@@ -19,5 +19,14 @@ public enum Category {
 
     private final String description;
 
+    public static Category fromDescription(String description) {
+        for (Category c : values()) {
+            if (c.getDescription().equals(description)) {
+                return c;
+            }
+        }
+        return ETC;
+    }
+
 
 }
