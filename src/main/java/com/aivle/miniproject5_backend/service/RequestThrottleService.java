@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-// 같은 IP 기준으로 도서별 좋아요/조회수 요청 시간을 기록하고,
-// 일정 시간(cooldown) 안의 중복 요청을 차단하는 서비스
 public class RequestThrottleService {
 
     private static final long LIKE_COOLDOWN_MILLIS = 30_000;
@@ -23,6 +21,10 @@ public class RequestThrottleService {
         return canProceed("VIEW", bookId, clientIp, VIEW_COOLDOWN_MILLIS);
     }
 
+    public long getRemainingLikeSeconds(Long bookId, String clientIp) {
+        return getRemainingSeconds("LIKE", bookId, clientIp, LIKE_COOLDOWN_MILLIS);
+    }
+
     private boolean canProceed(String type, Long bookId, String clientIp, long cooldownMillis) {
         long now = System.currentTimeMillis();
         String key = type + ":" + bookId + ":" + clientIp;
@@ -35,5 +37,18 @@ public class RequestThrottleService {
 
         requestStore.put(key, now);
         return true;
+    }
+
+    private long getRemainingSeconds(String type, Long bookId, String clientIp, long cooldownMillis) {
+        long now = System.currentTimeMillis();
+        String key = type + ":" + bookId + ":" + clientIp;
+
+        Long lastRequestedAt = requestStore.get(key);
+        if (lastRequestedAt == null) return 0;
+
+        long remainingMillis = cooldownMillis - (now - lastRequestedAt);
+        if (remainingMillis <= 0) return 0;
+
+        return (long) Math.ceil(remainingMillis / 1000.0);
     }
 }

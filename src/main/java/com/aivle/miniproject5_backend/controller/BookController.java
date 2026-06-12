@@ -76,8 +76,13 @@ public class BookController {
         String clientIp = extractClientIp(request);
 
         if (!requestThrottleService.canIncreaseLike(id, clientIp)) {
+            long retryAfterSeconds = requestThrottleService.getRemainingLikeSeconds(id, clientIp);
+
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-                    .body(Map.of("message", "좋아요는 잠시 후 다시 시도해주세요."));
+                    .body(Map.of(
+                            "message", "이미 좋아요를 눌렀습니다.",
+                            "retryAfterSeconds", retryAfterSeconds
+                    ));
         }
 
         Book updatedBook = bookService.addLikes(id);
