@@ -33,4 +33,19 @@ public class GlobalExceptionHandler {
         Map<String, String> body = Map.of("error", "Internal Server Error", "message", "서버 내부에서 에러 발생");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
+
+    // Open AI 호출 실패
+    @ExceptionHandler(org.springframework.web.client.HttpClientErrorException.class
+            )
+    public ResponseEntity<Map<String, String>> handleRestClientException(Exception e) {
+        Map<String, String> body = Map.of("error", "OpenAI API Error", "message", "외부 API 호출에 실패했습니다.");
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(body);
+    }
+
+    // 잘못된 Category
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException e) {
+        Map<String, String> body = Map.of("error", "Invalid value", "message", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
 }

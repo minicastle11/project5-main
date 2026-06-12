@@ -130,6 +130,10 @@ public class BookController {
                                                        @RequestParam String apiKey,
                                                        @RequestParam String imageSize
                           ) {
+        if (apiKey == null || apiKey.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Missing API Key", "message", "API Key가 입력되지 않았습니다."));
+        }
         String b64 = bookService.generateAndSaveImage(apiKey, book, imageSize);
         return ResponseEntity.ok(Map.of("b64Json", b64));
     }
@@ -144,6 +148,10 @@ public class BookController {
     @PostMapping("/category-recommend")
     public ResponseEntity<Map<String, String>> recommendCategory(@RequestBody Map<String, String> body,
                                                                  @RequestParam String apiKey) {
+        if (apiKey == null || apiKey.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Missing API Key", "message", "API Key가 입력되지 않았습니다."));
+        }
         String category = bookService.recommendCategory(apiKey, body.get("title"), body.get("content"));
         return ResponseEntity.ok(Map.of("category", category));
     }
